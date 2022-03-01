@@ -11,10 +11,10 @@ let testAtoms =
   let testWithExpectation name s exp = testAtom name s (fun _ -> exp)
 
   testList "Atoms" [
-    testAtom "Integer" "213" Atom.Number
-    testAtom "Float" "213.4" Atom.Number
-    testAtom "Date" "2021.01.01" Atom.Date
-    testWithExpectation "Symbol" "`symbolic " (Atom.Symbol "symbolic")
+    testAtom "Integer" "213" (Atom.Number >> Expression.Atom)
+    testAtom "Float" "213.4" (Atom.Number >> Expression.Atom)
+    testAtom "Date" "2021.01.01" (Atom.Date >> Expression.Atom)
+    testWithExpectation "Symbol" "`symbolic " (Atom.Symbol "symbolic" |> Expression.Atom)
   ]
 
 runTestsWithCLIArgs [] Array.empty testAtoms |> ignore

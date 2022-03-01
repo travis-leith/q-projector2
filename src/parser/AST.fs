@@ -9,6 +9,7 @@ type Atom =
   |Date of string
 
 type BinaryOperator = BinaryOperator of string //consider making a set of explicit operators
+
 type BinaryExpression = 
   {
     LeftSide: Expression
@@ -21,6 +22,7 @@ and Function =
     Body: Expression
   }
 and Expression = 
+  |Atom of Atom
   |Assignment of Identifier * Expression
   |Identifier of Identifier
   |BinaryExpression of BinaryExpression
