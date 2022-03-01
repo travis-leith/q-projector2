@@ -1,3 +1,5 @@
 */*/obj/
+*/*/bin/
 .paket/
 paket-files/
+.ionide/
