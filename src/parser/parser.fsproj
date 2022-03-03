@@ -8,5 +8,4 @@
     <Compile Include="AST.fs" />
     <Compile Include="Parser.fs" />
   </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
