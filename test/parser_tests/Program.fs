@@ -45,16 +45,48 @@ let testBinaryExpressions =
   let singleWithSpace = test "SingleWithSpacec" {
     let expectation = 
       {
+        LeftSide = "b" |> Identifier.Identifier |> Expression.Identifier
+        Operator = "*" |> BinaryOperator
+        RightSide = "1" |> Number |> Atom
+      } |> BinaryExpression
+    "b * 1" |> Parser.parseExpression |> Expect.equal "" (expectation |> Ok)
+  }
+
+  let double = test "Double" {
+    let expectation =
+      {
         LeftSide = "1" |> Number |> Atom
         Operator = "*" |> BinaryOperator
-        RightSide = "b" |> Identifier.Identifier |> Expression.Identifier
+        RightSide = 
+          {
+            LeftSide = "b" |> Identifier.Identifier |> Expression.Identifier
+            Operator = "+" |> BinaryOperator
+            RightSide = "3" |> Number |> Atom
+          } |> BinaryExpression
       } |> BinaryExpression
-    "1 * b" |> Parser.parseExpression |> Expect.equal "" (expectation |> Ok)
+    "1 * b +3" |> Parser.parseExpression |> Expect.equal "" (expectation |> Ok)
+  }
+
+  let parens = test "parens" {
+    let expectation =
+      {
+        LeftSide =
+          {
+            LeftSide = "1" |> Number |> Atom
+            Operator = "*" |> BinaryOperator
+            RightSide = "b" |> Identifier.Identifier |> Expression.Identifier
+          } |> BinaryExpression
+        Operator = "+" |> BinaryOperator
+        RightSide = "3" |> Number |> Atom
+      } |> BinaryExpression
+    "( 1 *b) +3" |> Parser.parseExpression |> Expect.equal "" (expectation |> Ok)
   }
 
   testList "BinaryExpressions" [
     singleNoSpace
     singleWithSpace
+    double
+    parens
   ]
 
 let allTests = testList "Parser" [
@@ -64,3 +96,4 @@ let allTests = testList "Parser" [
 ]
 
 runTestsWithCLIArgs [] Array.empty allTests |> ignore
+//"1 * b +3" |> Parser.parseExpression |> printfn "%A"
