@@ -25,6 +25,7 @@ and Function =
 and Expression = 
   |Atom of Atom
   |Assignment of Identifier * Expression
-  |Identifier of Identifier
+  |IdentExpr of Identifier
   |BinaryExpression of BinaryExpression
+  |Function of Function
 
