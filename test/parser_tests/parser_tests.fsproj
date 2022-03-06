@@ -5,6 +5,11 @@
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="Samples\gatewaylib.q">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Compile Include="TestScopeParser.fs" />
+    <Compile Include="TestParser.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

@@ -6,6 +6,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AST.fs" />
+    <Compile Include="StringConstants.fs" />
+    <Compile Include="ScopeAst.fs" />
+    <Compile Include="ScopeParser.fs" />
     <Compile Include="Parser.fs" />
   </ItemGroup>
 </Project>

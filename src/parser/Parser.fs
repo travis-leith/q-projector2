@@ -7,9 +7,8 @@ open System
 module private Utils =
   let normalChar = satisfy (fun c -> c <> '\\' && c <> '"')
   let escapedChar = pchar '\\' >>. (anyOf ['\\'; '\n'; '\r'; '\t'; '\"'])
-  let ws = spaces
-  let str_ws s = pstring s >>. ws
-  let char_ws c = pchar c >>. ws
+  let str_ws s = pstring s >>. spaces
+  let char_ws c = pchar c >>. spaces
 
 module private Atom =
   let date = 
@@ -34,7 +33,7 @@ module private Atom =
       string_
       number
       symbol
-    ]
+    ] .>> spaces
 
 module private Identifier =
   let parser =
@@ -48,11 +47,11 @@ module private BinaryExpression =
   type Assoc = Associativity
   let parser pLeftSide =
     let opp = new OperatorPrecedenceParser<Expression,unit,unit>()
-    opp.TermParser <- pLeftSide .>> ws
+    opp.TermParser <- pLeftSide
 
     ["+"; "-"; "*"; "%"; "="; "<>"; "~"; "<"; "<="; ">="; ">"; "|"; "&"; "#"; "^"]
     |> List.iter(fun opString ->
-      opp.AddOperator(InfixOperator(opString, ws, 1, Assoc.Right, fun x y -> {LeftSide = x; Operator = opString |> BinaryOperator; RightSide = y} |> BinaryExpression))
+      opp.AddOperator(InfixOperator(opString, spaces, 1, Assoc.Right, fun x y -> {LeftSide = x; Operator = opString |> BinaryOperator; RightSide = y} |> BinaryExpression))
     )
     opp.ExpressionParser
 
@@ -85,17 +84,20 @@ module private Expression =
  
 let terminateStatement = choice [
   char_ws ';'
-  skipNewline
+  spaces
   eof
 ]
 
 let statement = Expression.parser .>> terminateStatement
+
+let file = many1 statement
 
 let parse parser s =
   match run parser s with
   | Success(result, _, _)   -> Result.Ok result
   | Failure(errorMsg, _, _) -> Result.Error errorMsg
 
-let parseExpression = parse statement
+let parseStatement = parse statement
+let parseFile = parse file
     
   
