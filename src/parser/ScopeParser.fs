@@ -23,7 +23,7 @@ module private Atom =
   let number = 
     let format = 
       NumberLiteralOptions.AllowMinusSign ||| NumberLiteralOptions.AllowPlusSign ||| NumberLiteralOptions.AllowFraction
-    numberLiteral format "Not a number" |>> (fun nl -> nl.String |> ignore)
+    numberLiteral format "Not a number" |>> ignore
 
   let symbol = pchar '`' >>. manyCharsTill normalChar (pchar ' ' <|> pchar ';' <|> newline) |>> ignore
 
@@ -83,7 +83,7 @@ module private Usage =
     ] .>> spaces
 
   let definition = Identifier.parser .>>? skipChar ':' .>> spaces .>>. identifierDetail |>> (Definition >> Some)
-  let invokation = many Code.parser >>. Identifier.parser .>> spaces |>> (Invokation >> Some)
+  let invocation = many Code.parser >>. Identifier.parser .>> spaces |>> (Invocation >> Some)
   let code = Code.parser >>. preturn None
   let comment = Comment.parser >>. preturn None
 
@@ -91,9 +91,9 @@ module private Usage =
     choice [
       attempt definition
       attempt code
-      attempt invokation
+      attempt invocation
       attempt comment
-    ] |> many .>> eof |>> List.choose id
+    ] |> many |>> List.choose id
 
   let parser = pUsageRef.Value
 
@@ -109,6 +109,7 @@ let parseFile = parse GlobalScope.parser
 
 let parseCode = parse Usage.code
 let parseDefinition = parse Usage.definition
-let parseInvokaition = parse Usage.invokation
+let parseInvocation = parse (spaces >>. Usage.invocation)
 let parseComment = parse Usage.comment
-//let parseFunction = parse (Function.parser (many1 Usage.invokation |>> List.choose id))
+let parseFunction = parse (Function.parser Usage.parser)
+let parseFunctionParams = parse (Function.parser (preturn []))

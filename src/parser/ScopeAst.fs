@@ -2,7 +2,7 @@
 
 type IdentifierUse =
   |Definition of string * Scope option
-  |Invokation of string
+  |Invocation of string
 and Scope =
   {
     Paramaters:Set<string>
