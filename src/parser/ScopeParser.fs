@@ -52,17 +52,20 @@ module private Identifier =
 
 module private Function =
   let pParams = between (char_ws '[') (char_ws ']') (sepBy Identifier.parser (char_ws ';')) |>> Set.ofList
-  //let parser pUsage = 
-  //  let inBraces x = between (char_ws '{') (char_ws '}') x
-  //  pipe2 pParams pUsage (fun pars usage -> {Paramaters = pars; IdentifierUsage = usage}) |> inBraces .>> spaces
-  let parser pUsage = parse{
-    do! skipChar '{'
-    let! pars = pParams .>> spaces
-    let! body = charsTillString "}" true 10000
-    match run pUsage body with
-    |Success (usage,_,_) -> return {Paramaters = pars; IdentifierUsage = usage}
-    |Failure (e,_,_) -> return! fail e
-  }
+  let parser pUsage = 
+    let inBraces x = between (char_ws '{') (char_ws '}') x
+    let pBody = pipe2 (pParams .>> spaces) pUsage (fun pars usage -> {Paramaters = pars; IdentifierUsage = usage})
+    
+    inBraces pBody
+
+  //let parser pUsage = parse{
+  //  do! skipChar '{'
+  //  let! pars = pParams .>> spaces
+  //  let! body = charsTillString "}" true 10000
+  //  match run pUsage body with
+  //  |Success (usage,_,_) -> return {Paramaters = pars; IdentifierUsage = usage}
+  //  |Failure (e,_,_) -> return! fail e
+  //}
 
 module private Operator =
   let parser = skipAnyOf StringConstants.specialCharacters >>. spaces
@@ -82,7 +85,7 @@ module private Usage =
       attempt (Code.parser >>. preturn None)
     ] .>> spaces
 
-  let definition = Identifier.parser .>>? skipChar ':' .>> spaces .>>. identifierDetail |>> (Definition >> Some)
+  let definition = Identifier.parser .>> skipChar ':' .>> spaces .>>. identifierDetail .>> spaces .>> skipChar ';' .>> spaces |>> (Definition >> Some)
   let invocation = many Code.parser >>. Identifier.parser .>> spaces |>> (Invocation >> Some)
   let code = Code.parser >>. preturn None
   let comment = Comment.parser >>. preturn None
@@ -98,7 +101,7 @@ module private Usage =
   let parser = pUsageRef.Value
 
 module private GlobalScope =
-  let parser = Usage.parser |>> (fun x -> {Paramaters = Set.empty; IdentifierUsage = x})
+  let parser = spaces >>. Usage.parser |>> (fun x -> {Paramaters = Set.empty; IdentifierUsage = x})
 
 let parse parser s =
   match run parser s with
